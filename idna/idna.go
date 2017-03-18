@@ -25,7 +25,7 @@ func ToASCII(s string) (string, error) {
 	if ascii(s) {
 		return s, nil
 	}
-	labels := strings.Split(s, ".")
+	labels := strings.Split(normalizeSeparators(s), ".")
 	for i, label := range labels {
 		if !ascii(label) {
 			a, err := encode(acePrefix, label)
@@ -65,4 +65,18 @@ func ascii(s string) bool {
 		}
 	}
 	return true
+}
+
+func normalizeSeparators(s string) string {
+	// https://tools.ietf.org/html/rfc3490#section-3.1
+	// 3.1 Requirements
+	//
+	//   IDNA conformance means adherence to the following four requirements:
+	//
+	//   1) Whenever dots are used as label separators, the following
+	//      characters MUST be recognized as dots: U+002E (full stop), U+3002
+	//      (ideographic full stop), U+FF0E (fullwidth full stop), U+FF61
+	//      (halfwidth ideographic full stop).
+	r := strings.NewReplacer("\u3002", ".", "\uFF0E", ".", "\uFF61", ".")
+	return r.Replace(s)
 }

@@ -39,5 +39,24 @@ func TestIDNA(t *testing.T) {
 	}
 }
 
+var idnaSeparatorTestCases = [...]struct {
+	ascii, unicode string
+}{
+	// Domains.
+	{"example.jp", "example\u3002jp"},
+	{"xn--1lqs71d.jp", "東京\uFF0Ejp"},
+	{"xn--pssu33l.jp", "大阪\uFF61jp"},
+}
+
+func TestIDNASeparators(t *testing.T) {
+	for _, tc := range idnaSeparatorTestCases {
+		if a, err := ToASCII(tc.unicode); err != nil {
+			t.Errorf("ToASCII(%q): %v", tc.unicode, err)
+		} else if a != tc.ascii {
+			t.Errorf("ToASCII(%q): got %q, want %q", tc.unicode, a, tc.ascii)
+		}
+	}
+}
+
 // TODO(nigeltao): test errors, once we've specified when ToASCII and ToUnicode
 // return errors.
